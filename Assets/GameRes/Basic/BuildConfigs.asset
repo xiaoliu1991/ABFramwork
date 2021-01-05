@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fedb1b85b37d65c40b75ab092d992c3f, type: 3}
+  m_Name: BuildConfigs
+  m_EditorClassIdentifier: 
+  OneFloderOneBundle:
+  - asset: {fileID: 102900000, guid: b24f2b73475feba4cb9e98deea419270, type: 3}
+  - asset: {fileID: 102900000, guid: afb0c8864e82146479cdf9b3b9ea9646, type: 3}
+  - asset: {fileID: 102900000, guid: 192f755f16a82f64bb57e87ac90a3eff, type: 3}
+  SubFloderOneBundle:
+  - asset: {fileID: 102900000, guid: 2d2b2f7a699db68448e0066419d776ed, type: 3}
+  - asset: {fileID: 102900000, guid: f596e8d28437fa64f92cd5fed05a3fcf, type: 3}
+  OneAssetOneBundle: []

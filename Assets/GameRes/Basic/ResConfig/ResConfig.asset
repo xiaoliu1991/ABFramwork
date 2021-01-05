@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 241275544c29aa8479316790989a1045, type: 3}
+  m_Name: ResConfig
+  m_EditorClassIdentifier: 
+  configs:
+  - name: msyh
+    extension: .ttf
+    abName: basic/font.ab
+    gamePath: Assets/GameRes/Basic/Font/msyh/msyh.ttf
+  - name: ResConfig
+    extension: .asset
+    abName: basic/resconfig.ab
+    gamePath: Assets/GameRes/Basic/ResConfig/ResConfig.asset
+  - name: Red
+    extension: .mat
+    abName: basic/effect.ab
+    gamePath: Assets/GameRes/Basic/Effect/Material/Red.mat
+  - name: LoginPanel
+    extension: .prefab
+    abName: basic/ui/login.ab
+    gamePath: Assets/GameRes/Basic/UI/Login/LoginPanel.prefab
+  - name: TipsPanel
+    extension: .prefab
+    abName: basic/ui/tips.ab
+    gamePath: Assets/GameRes/Basic/UI/Tips/TipsPanel.prefab
+  - name: LoginAtlas_1
+    extension: .png
+    abName: basic/atlas/loginatlas.ab
+    gamePath: Assets/GameRes/Basic/Atlas/LoginAtlas/LoginAtlas_1.png
+  - name: LoginAtlas_2
+    extension: .png
+    abName: basic/atlas/loginatlas.ab
+    gamePath: Assets/GameRes/Basic/Atlas/LoginAtlas/LoginAtlas_2.png
+  - name: LoginAtlas_3
+    extension: .png
+    abName: basic/atlas/loginatlas.ab
+    gamePath: Assets/GameRes/Basic/Atlas/LoginAtlas/LoginAtlas_3.png
+  - name: LoginAtlas_4
+    extension: .png
+    abName: basic/atlas/loginatlas.ab
+    gamePath: Assets/GameRes/Basic/Atlas/LoginAtlas/LoginAtlas_4.png
+  - name: LoginAtlas_5
+    extension: .png
+    abName: basic/atlas/loginatlas.ab
+    gamePath: Assets/GameRes/Basic/Atlas/LoginAtlas/LoginAtlas_5.png
