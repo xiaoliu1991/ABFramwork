@@ -1,0 +1,10 @@
+Temp/
+*.csproj
+*.user
+*.sln
+.vs/
+.vscode/
+Library/
+obj/
+BuildABs/
+HotUpdate/

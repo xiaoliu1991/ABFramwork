@@ -10,6 +10,7 @@ public struct UpdateInfo
 {
     public string name;
     public int size;
+    public string crc;
 
     public override string ToString()
     {
@@ -17,20 +18,22 @@ public struct UpdateInfo
     }
 }
 
+
 public class HotUpdateManager : UnitySingleton<HotUpdateManager>
 {
     private string mServerUrl = "http://192.168.0.75:8080/Resource/";
     private string mVersionUrl = "http://192.168.0.75:8080/Resource/version.txt";
 
-    private Action<UpdateInfo,bool> mUpdateCall;
-    private Action mErrorCall;
-    private Action<bool> mCompleteCall;
-    private HttpDownLoad mDownLoad;
+    private Dictionary<string,UpdateInfo> mUpdateList = new Dictionary<string, UpdateInfo>();
+    private ResUpdateProgress mProgress = new ResUpdateProgress();
 
-    public void OnUpdate(Action<UpdateInfo, bool> update,Action error,Action<bool> complete)
+    private Action<UpdateInfo, float> mUpdateFinishCall;
+    private Action<string> mErrorCall;
+    private Action mCompleteCall;
+
+    public void OnUpdate(Action<UpdateInfo, float> updateFinish,Action<string> error,Action complete)
     {
-        mDownLoad = new HttpDownLoad();
-        this.mUpdateCall = update;
+        this.mUpdateFinishCall = updateFinish;
         this.mErrorCall = error;
         this.mCompleteCall = complete;
 #if UNITY_EDITOR
@@ -40,10 +43,10 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
         }
         else
         {
-            mCompleteCall(false);
+            mCompleteCall();
         }
 #else
-    StartCoroutine(LoadVersion());
+        StartCoroutine(LoadVersion());
 #endif
     }
 
@@ -100,12 +103,12 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
         {
             if (string.IsNullOrEmpty(Main.Inst.Version))
             {
-                mErrorCall();
+                mErrorCall("资源未配置！");
             }
             else
             {
                 //无热更
-                mCompleteCall(false);
+                mCompleteCall();
             }
             yield break; 
         }
@@ -132,13 +135,14 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
             streamFiles = File.ReadAllText(path);
         }
         CollectDownFile(netFiles, perFiles, streamFiles);
+        DownLoadFiles();
     }
-
-    private void CollectDownFile(string netFiles,string perFiles,string streamFiles)
+    private void CollectDownFile(string netFiles, string perFiles, string streamFiles)
     {
-        bool isLoadLoalAsset = string.IsNullOrEmpty(netFiles) && string.IsNullOrEmpty(perFiles) && !string.IsNullOrEmpty(streamFiles);
+        mUpdateList.Clear();
+        Main.Inst.LoadLocalAsset = string.IsNullOrEmpty(netFiles) && string.IsNullOrEmpty(perFiles) && !string.IsNullOrEmpty(streamFiles);
         string[] netFilesArr = netFiles.Split(new string[] { "\r\n" }, StringSplitOptions.None);
-        List<UpdateInfo> list = new List<UpdateInfo>();
+
         if (string.IsNullOrEmpty(streamFiles) && string.IsNullOrEmpty(perFiles))
         {
             for (int i = 0; i < netFilesArr.Length; i++)
@@ -146,9 +150,10 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
                 if (string.IsNullOrEmpty(netFilesArr[i])) continue;
                 string[] fileArr = netFilesArr[i].Split('|');
                 UpdateInfo info = new UpdateInfo();
-                info.name = fileArr[0];
+                info.name = fileArr[0].Replace("\\", "/");
+                info.crc = fileArr[1];
                 info.size = int.Parse(fileArr[2]);
-                list.Add(info);
+                mUpdateList.Add(info.name,info);
             }
         }
         else
@@ -180,9 +185,10 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
                             if (!netFileArr[1].Equals(targetFileArr[1]))
                             {
                                 UpdateInfo info = new UpdateInfo();
-                                info.name = netFileArr[0];
+                                info.name = netFileArr[0].Replace("\\", "/");
+                                info.crc = netFileArr[1];
                                 info.size = int.Parse(netFileArr[2]);
-                                list.Add(info);
+                                mUpdateList.Add(info.name, info);
                             }
                         }
                     }
@@ -190,14 +196,23 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
                     if (!isFind)
                     {
                         UpdateInfo info = new UpdateInfo();
-                        info.name = netFileArr[0];
+                        info.name = netFileArr[0].Replace("\\", "/");
+                        info.crc = netFileArr[1];
                         info.size = int.Parse(netFileArr[2]);
-                        list.Add(info);
+                        mUpdateList.Add(info.name, info);
                     }
                 }
             }
         }
+    }
 
+    private void DownLoadFiles()
+    {
+        if (mUpdateList.Count<=0)
+        {
+            mCompleteCall();
+            return;
+        }
 
         string path = mServerUrl + string.Format("{0}/{1}/{2}", Main.Inst.Version, Paths.PlatformName, "files.txt");
         string savePath = "";
@@ -206,24 +221,61 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
 #else
         savePath = Paths.PersistentDataPath + "files.txt";
 #endif
-        FileUtils.DelFile(savePath);
-        FileUtils.CreateDirectory(savePath);
-        bool state = mDownLoad.DownLoadFile(path, savePath);
-        foreach (var info in list)
+        bool state = HttpDownLoad.DownLoadFile(path, savePath);
+        if (!state)
         {
-            path = mServerUrl + string.Format("{0}/{1}/{2}", Main.Inst.Version, Paths.PlatformName, info.name);
+            mErrorCall("热更差异化文件下载失败！");
+            return;
+        }
+
+        mProgress.Reset();
+        mProgress.TotalNum = mUpdateList.Count;
+        foreach (var dic in mUpdateList)
+        {
+            mProgress.TotalSize += dic.Value.size;
+        }
+
+        foreach (var dic in mUpdateList)
+        {
+            var info = dic.Value;
+            string url = mServerUrl + string.Format("{0}/{1}/", Main.Inst.Version, Paths.PlatformName);
 #if UNITY_EDITOR
-            savePath = Paths.PersistentDataPath + string.Format("{0}/{1}", Paths.PlatformName, info.name.Replace("\\","/"));
+            savePath = Paths.PersistentDataPath + string.Format("{0}/{1}", Paths.PlatformName, info.name);
 #else
             savePath = Paths.PersistentDataPath + info.name.Replace("\\","/");
 #endif
-            FileUtils.DelFile(savePath);
-            FileUtils.CreateDirectory(savePath);
-            state = mDownLoad.DownLoadFile(path, savePath);
-            Debug.Log("下载文件：" + savePath);
-            mUpdateCall(info, state);
+            DownLoadManager.Inst.StartDownload(info.name, url, savePath, info.size,info.crc, OnProcess, OnFinish);
+        }
+    }
+
+    private void OnProcess(string name, DownLoadProgress progress)
+    {
+        mProgress.Size = progress.Size;
+        Debug.LogFormat("OnProcess===>Success:{0}  {1}",name, progress.SizeKB);
+    }
+
+
+    private void OnFinish(string name, bool result)
+    {
+        if (result)
+        {
+            mUpdateFinishCall(mUpdateList[name],mProgress.Progress);
+            mUpdateList.Remove(name);
+            mProgress.SuccessNum++;
+        }
+        else
+        {
+            mProgress.FailedNum++;
         }
 
-        mCompleteCall(isLoadLoalAsset);
+        Debug.LogFormat("OnDownloadFinish===>Success:{0}  {1},Failed:{2}",name, mProgress.SuccessNum, mProgress.FailedNum);
+
+        if (mProgress.IsFinish)
+        {
+            if (mProgress.IsSuccess)
+            {
+                mCompleteCall();
+            }
+        }
     }
 }

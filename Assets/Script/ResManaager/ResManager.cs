@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-public class ResManager : Singleton<ResManager>
+public class ResManager : UnitySingleton<ResManager>
 {
     private Dictionary<Def.ModulesType,BaseLoader> mLoader = new Dictionary<Def.ModulesType, BaseLoader>();
 

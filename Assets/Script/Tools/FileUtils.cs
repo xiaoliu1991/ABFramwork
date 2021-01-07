@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.IO;
+using UnityEngine;
 
 public class FileUtils
 {
@@ -45,5 +46,91 @@ public class FileUtils
         {
             throw;
         }
+    }
+
+    /// <summary>
+    /// 移动文件
+    /// </summary>
+    /// <param name="srcFilePath"></param>
+    /// <param name="destFilePath"></param>
+    public static void MoveFile(string srcFilePath, string destFilePath)
+    {
+        if (File.Exists(srcFilePath))
+        {
+            if (File.Exists(destFilePath))
+                File.Delete(destFilePath);
+            File.Move(srcFilePath, destFilePath);
+        }
+    }
+
+
+    /// <summary>
+    /// 打开文件流，如果不存在，就创建一个文件
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns></returns>
+    public static Stream ForceOpenFileStream(string filePath)
+    {
+        var directory = Path.GetDirectoryName(filePath);
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        Stream fileStream = null;
+        try
+        {
+            fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
+        }
+        catch (Exception e)
+        {
+            if (fileStream != null)
+            {
+                fileStream.Close();
+                fileStream = null;
+            }
+            Debug.LogWarning(string.Format("Failed to force open file stream: {0}, error {1}!", filePath, e.Message));
+        }
+
+        return fileStream;
+    }
+
+
+    public static long GetFileBytesSize(string filePath)
+    {
+        if (!File.Exists(filePath))
+            return 0;
+        long byteSize = 0;
+        var stream = OpenFileStream(filePath);
+        if (stream != null)
+        {
+            byteSize = stream.Length;
+            stream.Close();
+        }
+        return byteSize;
+    }
+
+    /// <summary>
+    /// 打开文件流
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns></returns>
+    public static Stream OpenFileStream(string filePath)
+    {
+        Stream fileStream = null;
+        try
+        {
+            fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+        }
+        catch (Exception e)
+        {
+            if (fileStream != null)
+            {
+                fileStream.Close();
+                fileStream = null;
+            }
+        }
+
+        return fileStream;
     }
 }

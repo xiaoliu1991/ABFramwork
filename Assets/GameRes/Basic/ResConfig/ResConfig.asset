@@ -16,14 +16,14 @@ MonoBehaviour:
     extension: .ttf
     abName: basic/font.ab
     gamePath: Assets/GameRes/Basic/Font/msyh/msyh.ttf
-  - name: ResConfig
-    extension: .asset
-    abName: basic/resconfig.ab
-    gamePath: Assets/GameRes/Basic/ResConfig/ResConfig.asset
   - name: Red
     extension: .mat
     abName: basic/effect.ab
     gamePath: Assets/GameRes/Basic/Effect/Material/Red.mat
+  - name: ResConfig
+    extension: .asset
+    abName: basic/resconfig.ab
+    gamePath: Assets/GameRes/Basic/ResConfig/ResConfig.asset
   - name: LoginPanel
     extension: .prefab
     abName: basic/ui/login.ab

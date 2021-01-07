@@ -13,7 +13,7 @@ public class LoginPanel : MonoBehaviour
     private void OnLogin()
     {
         Transform uiRoot = GameObject.Find("UIRoot").transform;
-        Transform tips = Main.ResMgr.LoadRes<GameObject>(Def.ModulesType.Basic, "TipsPanel").transform;
+        Transform tips = ResManager.Inst.LoadRes<GameObject>(Def.ModulesType.Basic, "TipsPanel").transform;
         tips.SetParent(uiRoot, false);
         tips.localEulerAngles = Vector3.zero;
         tips.localScale = Vector3.one;

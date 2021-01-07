@@ -10,8 +10,10 @@ public class HttpDownLoad
     /// 文件保存路径和文件名
     /// 返回服务器文件名
     ///
-    public bool DownLoadFile(string strFileName, string localfile)
+    public static bool DownLoadFile(string strFileName, string localfile)
     {
+        FileUtils.DelFile(localfile);
+        FileUtils.CreateDirectory(localfile);
         bool flag = false;
         //打开上次下载的文件
         long sPosition = 0;

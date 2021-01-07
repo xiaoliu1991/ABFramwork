@@ -340,7 +340,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22d555ba98a33cf45abf588a5a645ee9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsABLoad: 0
+  IsABLoad: 1
   Version: 
   LoadLocalAsset: 0
 --- !u!4 &1001755948

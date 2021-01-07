@@ -13,8 +13,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   OneFloderOneBundle:
   - asset: {fileID: 102900000, guid: b24f2b73475feba4cb9e98deea419270, type: 3}
-  - asset: {fileID: 102900000, guid: afb0c8864e82146479cdf9b3b9ea9646, type: 3}
   - asset: {fileID: 102900000, guid: 192f755f16a82f64bb57e87ac90a3eff, type: 3}
+  - asset: {fileID: 102900000, guid: afb0c8864e82146479cdf9b3b9ea9646, type: 3}
+  - asset: {fileID: 102900000, guid: ab8c51bb0b3900e4cb240eed4354127e, type: 3}
   SubFloderOneBundle:
   - asset: {fileID: 102900000, guid: 2d2b2f7a699db68448e0066419d776ed, type: 3}
   - asset: {fileID: 102900000, guid: f596e8d28437fa64f92cd5fed05a3fcf, type: 3}

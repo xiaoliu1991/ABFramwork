@@ -13,6 +13,6 @@ public class TipsPanel : MonoBehaviour
     private void onClose()
     {
         Destroy(gameObject);
-        Main.ResMgr.Remove(Def.ModulesType.Basic,"TipsPanel");
+        ResManager.Inst.Remove(Def.ModulesType.Basic,"TipsPanel");
     }
 }
