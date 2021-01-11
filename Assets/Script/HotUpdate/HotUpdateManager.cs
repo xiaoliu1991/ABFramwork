@@ -25,7 +25,7 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
     private string mVersionUrl = "http://192.168.0.75:8080/Resource/version.txt";
 
     private Dictionary<string,UpdateInfo> mUpdateList = new Dictionary<string, UpdateInfo>();
-    private ResUpdateProgress mProgress = new ResUpdateProgress();
+    private ResourceUpdateProgress mProgress = new ResourceUpdateProgress();
 
     private Action<UpdateInfo, float> mUpdateFinishCall;
     private Action<string> mErrorCall;
