@@ -29,7 +29,7 @@ public class Paths
     /// 持久化目录
     /// </summary>
 #if UNITY_EDITOR
-    public static string PersistentDataPath = Application.dataPath + "/../HotUpdate/";
+    public static string PersistentDataPath = Application.dataPath + "/../HotUpdate/Android/";
 #elif UNITY_ANDROID
         public static string PersistentDataPath = Application.persistentDataPath + "/Android/";
 #elif UNITY_IOS

@@ -105,34 +105,16 @@ public class AssetBundleLoader : BaseLoader
 
     private AssetBundle LoadABFile(string path)
     {
-        string loadPath = string.Empty;
+        string loadPath = Paths.PersistentDataPath + path;
         AssetBundle ab = null;
-        if (!Main.Inst.LoadLocalAsset)
+        if (File.Exists(loadPath))
         {
-#if UNITY_EDITOR
-            loadPath = Paths.PersistentDataPath + Paths.PlatformName + "/" + path;
-#else
-            loadPath = Paths.PersistentDataPath + path;
-#endif
-            Debug.LogError("[LoadABFile]: " + loadPath);
             ab = AssetBundle.LoadFromFile(loadPath);
         }
         else
         {
             loadPath = Paths.StreamPath + path;
-            if (File.Exists(loadPath))
-            {
-                ab = AssetBundle.LoadFromFile(loadPath);
-            }
-            else
-            {
-#if UNITY_EDITOR
-                loadPath = Paths.PersistentDataPath + Paths.PlatformName + "/" + path;
-#else
-                loadPath = Paths.PersistentDataPath + path;
-#endif
-                ab = AssetBundle.LoadFromFile(loadPath);
-            }
+            ab = AssetBundle.LoadFromFile(loadPath);
         }
         return ab;
     }

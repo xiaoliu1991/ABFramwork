@@ -52,7 +52,6 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
     IEnumerator LoadVersion()
     {
         string netVersion = string.Empty;
-        string localUpdateVersion = string.Empty;
         string localVersion = string.Empty;
         string path = Application.streamingAssetsPath + "/version.txt";
         WWW www = new WWW(path);
@@ -64,18 +63,6 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
         else
         {
             localVersion = www.text;
-        }
-
-        path = Paths.PersistentDataPath + "version.txt";
-        www = new WWW(path);
-        yield return www;
-        if (!string.IsNullOrEmpty(www.error))
-        {
-            Debug.LogWarning("持久化目录无热更文件！");
-        }
-        else
-        {
-            localUpdateVersion = www.text;
         }
 
         www = new WWW(mServerUrl + "version.txt");
@@ -90,13 +77,9 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
         }
 
         if (!string.IsNullOrEmpty(localVersion)) Main.Inst.Version = localVersion;
-        if (!string.IsNullOrEmpty(localUpdateVersion)) Main.Inst.Version = localUpdateVersion;
         if (!string.IsNullOrEmpty(netVersion))
         {
             Main.Inst.Version = netVersion;
-            string p = Paths.PersistentDataPath + "version.txt";
-            FileUtils.CreateDirectory(p);
-            File.WriteAllText(p, netVersion);
         }
         else
         {
@@ -121,86 +104,69 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
             yield break;
         }
         string netFiles = www.text;
-        string perFiles = string.Empty;
         string streamFiles = string.Empty;
-        path = Paths.PersistentDataPath + string.Format("{0}/{1}", Paths.PlatformName, "files.txt");
-        if (File.Exists(path))
-        {
-            perFiles = File.ReadAllText(path);
-        }
         path = Paths.StreamPath + string.Format("{0}/{1}", Paths.PlatformName, "files.txt");
         if (File.Exists(path))
         {
             streamFiles = File.ReadAllText(path);
         }
-        CollectDownFile(netFiles, perFiles, streamFiles);
+        CollectDownFile(netFiles,streamFiles);
         DownLoadFiles();
     }
-    private void CollectDownFile(string netFiles, string perFiles, string streamFiles)
+    private void CollectDownFile(string netFiles,string streamFiles)
     {
         mUpdateList.Clear();
-        Main.Inst.LoadLocalAsset = string.IsNullOrEmpty(netFiles) && string.IsNullOrEmpty(perFiles) && !string.IsNullOrEmpty(streamFiles);
+        string[] perFiles = Directory.GetFiles(Paths.PersistentDataPath, "*",SearchOption.AllDirectories);
         string[] netFilesArr = netFiles.Split(new string[] { "\r\n" }, StringSplitOptions.None);
 
-        if (string.IsNullOrEmpty(streamFiles) && string.IsNullOrEmpty(perFiles))
+        for (int i = 0; i < netFilesArr.Length; i++)
         {
-            for (int i = 0; i < netFilesArr.Length; i++)
+            if (string.IsNullOrEmpty(netFilesArr[i])) continue;
+            string[] fileArr = netFilesArr[i].Split('|');
+            UpdateInfo info = new UpdateInfo();
+            string netFile = fileArr[0].Replace("\\", "/");
+            string netCrc = fileArr[1];
+            string netSize = fileArr[2];
+            info.name = netFile;
+            info.crc = netCrc;
+            info.size = int.Parse(netSize);
+            bool isNewFile = true;
+            if (perFiles.Length > 0)
             {
-                if (string.IsNullOrEmpty(netFilesArr[i])) continue;
-                string[] fileArr = netFilesArr[i].Split('|');
-                UpdateInfo info = new UpdateInfo();
-                info.name = fileArr[0].Replace("\\", "/");
-                info.crc = fileArr[1];
-                info.size = int.Parse(fileArr[2]);
-                mUpdateList.Add(info.name,info);
-            }
-        }
-        else
-        {
-            string[] targetFilesArr = null;
-            if (!string.IsNullOrEmpty(perFiles) && string.IsNullOrEmpty(streamFiles))
-            {
-                targetFilesArr = perFiles.Split(new string[] { "\r\n" }, StringSplitOptions.None);
-            }
-            else if (string.IsNullOrEmpty(perFiles) && !string.IsNullOrEmpty(streamFiles))
-            {
-                targetFilesArr = streamFiles.Split(new string[] { "\r\n" }, StringSplitOptions.None);
-            }
-
-            if (null != targetFilesArr)
-            {
-                for (int i = 0; i < netFilesArr.Length; i++)
+                for (int j = 0; j < perFiles.Length; j++)
                 {
-                    if (string.IsNullOrEmpty(netFilesArr[i])) continue;
-                    string[] netFileArr = netFilesArr[i].Split('|');
-                    bool isFind = false;
-                    for (int j = 0; j < targetFilesArr.Length; j++)
+                    string fileName = perFiles[j].Replace(Paths.PersistentDataPath, "").Replace("\\", "/");
+                    if (netFile.Equals(fileName))
                     {
-                        if (string.IsNullOrEmpty(targetFilesArr[j])) continue;
-                        string[] targetFileArr = targetFilesArr[j].Split('|');
-                        if (netFileArr[0].Equals(targetFileArr[0]))
+                        isNewFile = false;
+                        if (!FileToCRC32.GetFileCRC32(perFiles[j]).Equals(netCrc))
                         {
-                            isFind = true;
-                            if (!netFileArr[1].Equals(targetFileArr[1]))
-                            {
-                                UpdateInfo info = new UpdateInfo();
-                                info.name = netFileArr[0].Replace("\\", "/");
-                                info.crc = netFileArr[1];
-                                info.size = int.Parse(netFileArr[2]);
-                                mUpdateList.Add(info.name, info);
-                            }
+                            mUpdateList.Add(info.name, info);
                         }
                     }
-
-                    if (!isFind)
+                }
+            }
+            else if (!string.IsNullOrEmpty(streamFiles))
+            {
+                string[] streamFilesArr = streamFiles.Split(new string[] { "\r\n" }, StringSplitOptions.None);
+                for (int j = 0; j < streamFilesArr.Length; j++)
+                {
+                    if (string.IsNullOrEmpty(streamFilesArr[j])) continue;
+                    string[] sfileArr = streamFilesArr[i].Split('|');
+                    if (sfileArr[0].Replace("\\", "/").Equals(netFile))
                     {
-                        UpdateInfo info = new UpdateInfo();
-                        info.name = netFileArr[0].Replace("\\", "/");
-                        info.crc = netFileArr[1];
-                        info.size = int.Parse(netFileArr[2]);
-                        mUpdateList.Add(info.name, info);
+                        isNewFile = false;
+                        if (!sfileArr[1].Equals(netCrc))
+                        {
+                            mUpdateList.Add(info.name, info);
+                        }
                     }
                 }
+            }
+
+            if (isNewFile)
+            {
+                mUpdateList.Add(info.name, info);
             }
         }
     }
@@ -214,12 +180,7 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
         }
 
         string path = mServerUrl + string.Format("{0}/{1}/{2}", Main.Inst.Version, Paths.PlatformName, "files.txt");
-        string savePath = "";
-#if UNITY_EDITOR
-        savePath = Paths.PersistentDataPath + string.Format("{0}/{1}", Paths.PlatformName, "files.txt");
-#else
-        savePath = Paths.PersistentDataPath + "files.txt";
-#endif
+        string savePath = savePath = Paths.PersistentDataPath + "files.txt";
         bool state = HttpDownLoad.DownLoadFile(path, savePath);
         if (!state)
         {
@@ -238,11 +199,7 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
         {
             var info = dic.Value;
             string url = mServerUrl + string.Format("{0}/{1}/", Main.Inst.Version, Paths.PlatformName);
-#if UNITY_EDITOR
-            savePath = Paths.PersistentDataPath + string.Format("{0}/{1}", Paths.PlatformName, info.name);
-#else
-            savePath = Paths.PersistentDataPath + info.name.Replace("\\","/");
-#endif
+            savePath = Paths.PersistentDataPath + info.name.Replace("\\", "/");
             DownLoadManager.Inst.StartDownload(info.name, url, savePath, info.size,info.crc, OnProcess, OnFinish);
         }
     }
@@ -250,7 +207,7 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
     private void OnProcess(string name, DownLoadProgress progress)
     {
         mProgress.Size = progress.Size;
-        Debug.LogFormat("OnProcess===>Success:{0}  {1}",name, progress.SizeKB);
+        //Debug.LogFormat("OnProcess===>Success:{0}  {1}",name, progress.SizeKB);
     }
 
 

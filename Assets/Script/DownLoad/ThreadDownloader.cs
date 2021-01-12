@@ -609,7 +609,7 @@ public class ThreadDownloader
                         if (localCrc == fileCRC)
                         {
                             FileUtils.MoveFile(fileLocalCache, savePath);
-                            Debug.Log(string.Format("Finish download success file {0}", fileName));
+                            //Debug.Log(string.Format("Finish download success file {0}", fileName));
                         }
                         else
                         {

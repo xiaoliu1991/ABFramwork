@@ -6,7 +6,6 @@ public class Main : MonoBehaviour
     public bool IsABLoad;
 
     public string Version;
-    public bool LoadLocalAsset;
 	// Use this for initialization
 	void Start ()
     {
