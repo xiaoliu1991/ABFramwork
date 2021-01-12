@@ -1,6 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
+using UnityEngine;
 
 public class HttpDownLoad
 {
@@ -10,7 +13,7 @@ public class HttpDownLoad
     /// 文件保存路径和文件名
     /// 返回服务器文件名
     ///
-    public static bool DownLoadFile(string strFileName, string localfile)
+    public static bool DownLoadFile(string url, string localfile)
     {
         FileUtils.DelFile(localfile);
         FileUtils.CreateDirectory(localfile);
@@ -36,8 +39,18 @@ public class HttpDownLoad
         }
         try
         {
-            //打开网络连接
-            HttpWebRequest myRequest = (HttpWebRequest)HttpWebRequest.Create(strFileName);
+            HttpWebRequest myRequest = null;
+            if (url.StartsWith("https", StringComparison.OrdinalIgnoreCase))
+            {
+                ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(CheckValidationResult);
+                myRequest = WebRequest.Create(url) as HttpWebRequest;
+                myRequest.ProtocolVersion = HttpVersion.Version10;
+            }
+            else
+            {
+                myRequest = WebRequest.Create(url) as HttpWebRequest;
+            }
+
             if (sPosition > 0)
                 myRequest.AddRange((int)sPosition);             //设置Range值
                                                                 //向服务器请求,获得服务器的回应数据流
@@ -55,11 +68,19 @@ public class HttpDownLoad
             myStream.Close();
             flag = true;        //返回true下载成功
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            Debug.LogError(e);
             fileStream.Close();
             flag = false;       //返回false下载失败
         }
         return flag;
     }
+
+
+    private static bool CheckValidationResult(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors errors)
+    {
+        return true; //总是接受
+    }
+
 }

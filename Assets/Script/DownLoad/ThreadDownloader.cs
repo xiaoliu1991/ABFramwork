@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading;
 using UnityEngine;
 using System.Text.RegularExpressions;
+using System.Security.Cryptography.X509Certificates;
+using System.Net.Security;
+
 public enum DownLoadType
 {
     NewFile,
@@ -409,7 +412,7 @@ public class ThreadDownloader
         {
             if (!string.IsNullOrEmpty(httpsReg.Match(url).ToString()))
             {
-//                ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(ResourceDownloadManager.CheckValidationResult);
+                ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(CheckValidationResult);
             }
 
             var stringBuilder = new StringBuilder();
@@ -455,6 +458,11 @@ public class ThreadDownloader
             FinishDownload(false);
             Debug.LogWarning(string.Format("BeginGetResponse exception. source: {0}, message: {1}.StackTrace:{2}", e.Source, e.Message, e.StackTrace));
         }
+    }
+
+    private static bool CheckValidationResult(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors errors)
+    {
+        return true; //总是接受
     }
 
 
