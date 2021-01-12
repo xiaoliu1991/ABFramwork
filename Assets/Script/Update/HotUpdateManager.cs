@@ -21,8 +21,7 @@ public struct UpdateInfo
 
 public class HotUpdateManager : UnitySingleton<HotUpdateManager>
 {
-    private string mServerUrl = "http://192.168.0.75:8080/Resource/";
-    private string mVersionUrl = "http://192.168.0.75:8080/Resource/version.txt";
+    private string mServerUrl = "https://gameres-1304728229.cos.ap-chengdu.myqcloud.com/";
 
     private Dictionary<string,UpdateInfo> mUpdateList = new Dictionary<string, UpdateInfo>();
     private ResourceUpdateProgress mProgress = new ResourceUpdateProgress();
@@ -79,7 +78,7 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
             localUpdateVersion = www.text;
         }
 
-        www = new WWW(mVersionUrl);
+        www = new WWW(mServerUrl + "version.txt");
         yield return www;
         if (!string.IsNullOrEmpty(www.error))
         {
