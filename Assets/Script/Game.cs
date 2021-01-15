@@ -5,7 +5,7 @@ public class Game : MonoBehaviour
 {
     private void Awake()
     {
-        //        new GameObject("LuaManager").AddComponent<LuaManager>();
+        new GameObject("LuaManager").AddComponent<LuaManager>();
         StartGame();
     }
 

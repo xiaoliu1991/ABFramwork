@@ -22,10 +22,11 @@ public class LuaManager : UnitySingleton<LuaManager>
    
     public void Main()
     {
+        
         luaState.Start();
         StartLooper();
         luaState.DoFile("Basic/Lua/Main.lua");
-        CallFunction("Main");
+        CallMethod("Main", "Initialize");
     }
 
     protected LuaFileUtils InitLoader()
