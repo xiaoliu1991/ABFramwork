@@ -7,6 +7,7 @@ public class LoginPanel : MonoBehaviour
 	// Use this for initialization
 	void Start ()
     {
+        LuaManager.Inst.CallMethod("Login", "Initialize");
         login.onClick.AddListener(OnLogin);
     }
 
