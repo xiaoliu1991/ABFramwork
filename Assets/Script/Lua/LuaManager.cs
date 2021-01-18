@@ -18,6 +18,7 @@ public class LuaManager : UnitySingleton<LuaManager>
         OpenLibs();
         luaState.LuaSetTop(0);
         Bind();
+        OnStart();
     }
 
    
