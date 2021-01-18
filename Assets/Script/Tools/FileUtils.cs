@@ -124,6 +124,7 @@ public class FileUtils
         }
         catch (Exception e)
         {
+            Debug.LogError(e);
             if (fileStream != null)
             {
                 fileStream.Close();

@@ -52,7 +52,7 @@ public class ResManager : UnitySingleton<ResManager>
     {
         BaseLoader loader = null;
 #if UNITY_EDITOR
-        if (Main.Inst.IsABLoad)
+        if (Main.Inst.UseABLoad)
         {
             loader = new AssetBundleLoader(type);
         }

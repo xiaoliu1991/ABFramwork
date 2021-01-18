@@ -3,8 +3,11 @@
 public class Main : MonoBehaviour
 {
     public static Main Inst;
-    public bool IsABLoad;
-
+    [XTip("使用AB模式加载")]
+    public bool UseABLoad;
+    [XTip("使用LuaAB模式加载")]
+    public bool UseLuaABLoad;
+    [XTip("版本号")]
     public string Version;
 	// Use this for initialization
 	void Start ()

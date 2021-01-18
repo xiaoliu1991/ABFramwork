@@ -13,6 +13,7 @@ public class LuaManager : UnitySingleton<LuaManager>
     protected void Init()
     {
         InitLoader();
+        LuaFileUtils.Instance.beZip = Main.Inst.UseLuaABLoad;
         luaState = new LuaState();
         OpenLibs();
         luaState.LuaSetTop(0);
@@ -20,9 +21,8 @@ public class LuaManager : UnitySingleton<LuaManager>
     }
 
    
-    public void Main()
+    public void OnStart()
     {
-        
         luaState.Start();
         StartLooper();
         luaState.DoFile("Basic/Lua/Main.lua");

@@ -23,8 +23,6 @@ SOFTWARE.
 using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
-using System.Collections;
-using System.Text;
 
 namespace LuaInterface
 {
@@ -36,7 +34,7 @@ namespace LuaInterface
             {
                 if (instance == null)
                 {
-                    instance = new LuaFileUtils();
+                    instance = new GameLuaLoader();
                 }
 
                 return instance;

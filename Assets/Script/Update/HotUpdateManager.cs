@@ -36,7 +36,7 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
         this.mErrorCall = error;
         this.mCompleteCall = complete;
 #if UNITY_EDITOR
-        if (Main.Inst.IsABLoad)
+        if (Main.Inst.UseABLoad)
         {
             StartCoroutine(LoadVersion());
         }
@@ -116,7 +116,11 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
     private void CollectDownFile(string netFiles,string streamFiles)
     {
         mUpdateList.Clear();
-        string[] perFiles = Directory.GetFiles(Paths.PersistentDataPath, "*",SearchOption.AllDirectories);
+        string[] perFiles = null;
+        if (Directory.Exists(Paths.PersistentDataPath))
+        {
+            perFiles = Directory.GetFiles(Paths.PersistentDataPath, "*", SearchOption.AllDirectories);
+        }
         string[] netFilesArr = netFiles.Split(new string[] { "\r\n" }, StringSplitOptions.None);
 
         for (int i = 0; i < netFilesArr.Length; i++)
@@ -131,7 +135,7 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
             info.crc = netCrc;
             info.size = int.Parse(netSize);
             bool isNewFile = true;
-            if (perFiles.Length > 0)
+            if (perFiles != null && perFiles.Length > 0)
             {
                 for (int j = 0; j < perFiles.Length; j++)
                 {
@@ -178,9 +182,9 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
             mCompleteCall();
             return;
         }
-
+        FileUtils.CreateDirectory(Paths.PersistentDataPath);
         string path = mServerUrl + string.Format("{0}/{1}/{2}", Main.Inst.Version, Paths.PlatformName, "files.txt");
-        string savePath = savePath = Paths.PersistentDataPath + "files.txt";
+        string savePath = Paths.PersistentDataPath + "files.txt";
         bool state = HttpDownLoad.DownLoadFile(path, savePath);
         if (!state)
         {
@@ -194,7 +198,6 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
         {
             mProgress.TotalSize += dic.Value.size;
         }
-
         foreach (var dic in mUpdateList)
         {
             var info = dic.Value;
@@ -215,9 +218,9 @@ public class HotUpdateManager : UnitySingleton<HotUpdateManager>
     {
         if (result)
         {
-            mUpdateFinishCall(mUpdateList[name],mProgress.Progress);
-            mUpdateList.Remove(name);
             mProgress.SuccessNum++;
+            mUpdateFinishCall(mUpdateList[name], mProgress.SuccessNum / (float)mProgress.TotalNum);
+            mUpdateList.Remove(name);
         }
         else
         {
