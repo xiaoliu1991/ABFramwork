@@ -1,6 +1,7 @@
 ﻿
 public static class Def
 {
+    public static string AppKey = "$#FGshgs35~!@!dfhFuck";
     public static string AssetBundleSuffix = "ab";
     /// <summary>
     /// 临时文件的结尾

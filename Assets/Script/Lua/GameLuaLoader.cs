@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using LuaInterface;
 using UnityEngine;
 
@@ -6,9 +7,10 @@ public class GameLuaLoader : LuaFileUtils
 {
     public override byte[] ReadFile(string fileName)
     {
+        string path = string.Empty;
         if (!beZip)
         {
-            string path = FindFile(fileName);
+            path = FindFile(fileName);
             byte[] str = null;
             if (!string.IsNullOrEmpty(path) && File.Exists(path))
             {
@@ -24,29 +26,48 @@ public class GameLuaLoader : LuaFileUtils
             fileName += ".lua";
         }
 
-        if (buffer == null)//加载Resources下面的lua文件
+        path = "Lua/" + fileName;
+        TextAsset text = Resources.Load(path, typeof(TextAsset)) as TextAsset;
+        if (text != null)
         {
-            string path = "Lua/" + fileName;
-            TextAsset text = Resources.Load(path, typeof(TextAsset)) as TextAsset;
-            if (text != null)
-            {
-                buffer = text.bytes;
-                Resources.UnloadAsset(text);
-            }
+            buffer = text.bytes;
+            Resources.UnloadAsset(text);
         }
+
         if (buffer == null)//加载AB包中的lua文件
         {
-//            AssetBundle bundle = map[fileName];
-//            TextAsset luaCode = bundle.LoadAsset<TextAsset>(fileName);
-//
-//            if (luaCode != null)
-//            {
-//                buffer = luaCode.bytes;
-//                Resources.UnloadAsset(luaCode);
-//            }
+            var type = GetModulesType(fileName);
+            if (type != Def.ModulesType.None)
+            {
+                string assetName = fileName.Replace("/", "@");
+                assetName = assetName.Replace(".lua", "");
+                TextAsset luaCode = ResManager.Inst.LoadRes<TextAsset>(type, assetName);
+                if (luaCode != null)
+                {
+                    TextAsset pwd = Resources.Load<TextAsset>("lb_pwd");
+                    byte[] bytes = luaCode.bytes;
+                    bytes = AES_EnorDecrypt.Decrypt(bytes, Def.AppKey+pwd.text);
+                    buffer = bytes;
+                    Resources.UnloadAsset(pwd);
+                }
+            }
+        }
+        return buffer;
+    }
+
+
+    private Def.ModulesType GetModulesType(string fileName)
+    {
+        string[] arr = fileName.Split('/');
+
+        foreach (Def.ModulesType t in Enum.GetValues(typeof(Def.ModulesType)))
+        {
+            if (t.ToString() == arr[0])
+            {
+                return t;
+            }
         }
 
-        return buffer;
-
+        return Def.ModulesType.None;
     }
 }

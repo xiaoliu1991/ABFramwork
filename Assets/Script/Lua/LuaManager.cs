@@ -26,7 +26,7 @@ public class LuaManager : UnitySingleton<LuaManager>
     {
         luaState.Start();
         StartLooper();
-        luaState.DoFile("Basic/Lua/Main.lua");
+        luaState.DoFile("Basic/Lua/Main");
         CallMethod("Main", "Initialize");
     }
 

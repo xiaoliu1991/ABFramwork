@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
+using Random = System.Random;
 
 public class BuildWindow : EditorWindow {
 
@@ -49,7 +50,11 @@ public class BuildWindow : EditorWindow {
         {
             RefreshResConfig();
         }
-
+        GUILayout.Space(5);
+        if (GUILayout.Button("CP_Lua", GUILayout.Height(40)))
+        {
+            CopyGameLua();
+        }
         GUILayout.Space(5);
         IsCopyToStream = GUILayout.Toggle(IsCopyToStream, "是否拷贝到流目录");
         //清理标记
@@ -57,6 +62,7 @@ public class BuildWindow : EditorWindow {
         {
             string version = DateTime.Now.ToString("yyMMddHHmmss");
             ClearMarks();
+            CopyGameLua();
             MarkAssetLabels();
             RefreshResConfig();
             string exportPath = GetExportPath(version);
@@ -94,6 +100,17 @@ public class BuildWindow : EditorWindow {
                 startIndex = 0;
                 break;
             }
+        }
+    }
+
+    public static void CopyGameLua()
+    {
+        string[] dirs = Directory.GetDirectories(Application.dataPath + "/" + Paths.GameResRoot);
+        for (int i = 0; i < dirs.Length; i++)
+        {
+            FileUtils.DeleteFolder(dirs[i] + "/LBytes");
+            CopyLuaBytesFiles(dirs[i]+"/Lua",dirs[i]+ "/LBytes");
+            AssetDatabase.Refresh();
         }
     }
 
@@ -290,5 +307,38 @@ public class BuildWindow : EditorWindow {
         if (Directory.Exists(floder))Directory.Delete(floder,true);
         Directory.CreateDirectory(floder);
         return floder;
+    }
+
+
+    static void CopyLuaBytesFiles(string sourceDir, string destDir,string searchPattern = "*.lua", SearchOption option = SearchOption.AllDirectories)
+    {
+        if (!Directory.Exists(sourceDir))
+        {
+            return;
+        }
+
+        string[] files = Directory.GetFiles(sourceDir, searchPattern, option);
+        int len = sourceDir.Length;
+
+        if (sourceDir[len - 1] == '/' || sourceDir[len - 1] == '\\')
+        {
+            --len;
+        }
+
+        Random ran = new Random(DateTime.Now.Millisecond);
+        int val = ran.Next(11111111, 99999999);
+        File.WriteAllText(Application.dataPath + "/Resources/lb_pwd.txt", val.ToString());
+
+        for (int i = 0; i < files.Length; i++)
+        {
+            string str = files[i].Replace("\\", "/").Replace(Application.dataPath+"/"+Paths.GameResRoot+"/", "");
+            str = str.Replace("/", "@").Replace(".lua", ".bytes");
+            string dest = destDir + "/" + str;
+            string dir = Path.GetDirectoryName(dest);
+            Directory.CreateDirectory(dir);
+            byte[] bytes = File.ReadAllBytes(files[i]);
+            bytes = AES_EnorDecrypt.Encrypt(bytes, Def.AppKey+val);
+            File.WriteAllBytes(dest, bytes);
+        }
     }
 }

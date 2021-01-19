@@ -13,10 +13,15 @@ public class Main : MonoBehaviour
 	void Start ()
     {
         Inst = this;
+        InitManager();
+        BeginUpdate();
+    }
+
+    private void InitManager()
+    {
         new GameObject("ResManager").AddComponent<ResManager>();
         new GameObject("HotUpdateManger").AddComponent<HotUpdateManager>();
         new GameObject("DownLoadManager").AddComponent<DownLoadManager>();
-        BeginUpdate();
     }
 
     private void BeginUpdate()
@@ -29,6 +34,5 @@ public class Main : MonoBehaviour
         update.localScale = Vector3.one;
         update.localPosition = Vector3.zero;
     }
-
 }
 

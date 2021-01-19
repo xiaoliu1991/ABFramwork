@@ -24,6 +24,18 @@ MonoBehaviour:
     extension: .asset
     abName: basic/resconfig.ab
     gamePath: Assets/GameRes/Basic/ResConfig/ResConfig.asset
+  - name: Basic@Lua@Core@Define
+    extension: .bytes
+    abName: basic/lbytes.ab
+    gamePath: Assets/GameRes/Basic/LBytes/Basic@Lua@Core@Define.bytes
+  - name: Basic@Lua@Main
+    extension: .bytes
+    abName: basic/lbytes.ab
+    gamePath: Assets/GameRes/Basic/LBytes/Basic@Lua@Main.bytes
+  - name: Basic@Lua@Modules@Login
+    extension: .bytes
+    abName: basic/lbytes.ab
+    gamePath: Assets/GameRes/Basic/LBytes/Basic@Lua@Modules@Login.bytes
   - name: LoginPanel
     extension: .prefab
     abName: basic/ui/login.ab

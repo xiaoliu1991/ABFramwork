@@ -5,10 +5,14 @@ public class Game : MonoBehaviour
 {
     private void Awake()
     {
-        new GameObject("LuaManager").AddComponent<LuaManager>();
+        InitLuaMgr();
         StartGame();
     }
 
+    private void InitLuaMgr()
+    {
+        new GameObject("LuaManager").AddComponent<LuaManager>();
+    }
 
 
     private void StartGame()
